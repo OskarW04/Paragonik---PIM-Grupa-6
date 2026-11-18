@@ -1,0 +1,35 @@
+name: paragonik
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: paragonik
+      POSTGRES_USER: paragonik
+      POSTGRES_PASSWORD: paragonik
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U paragonik -d paragonik"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/paragonik
+      DATABASE_USER: paragonik
+      DATABASE_PASSWORD: paragonik
+      JWT_SECRET: ${JWT_SECRET:-lokalny-sekret-tylko-do-developmentu-123}
+      FCM_SERVICE_ACCOUNT_BASE64: ${FCM_SERVICE_ACCOUNT_BASE64:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

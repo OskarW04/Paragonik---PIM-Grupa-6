@@ -1,0 +1,29 @@
+name: paragonik-test
+
+services:
+  test-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: paragonik_test
+      POSTGRES_USER: paragonik
+      POSTGRES_PASSWORD: paragonik
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U paragonik -d paragonik_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  tests:
+    build:
+      context: .
+      target: build
+    command: ["./gradlew", "--no-daemon", "-Pkotlin.compiler.execution.strategy=in-process", "test"]
+    environment:
+      TEST_DATABASE_URL: jdbc:postgresql://test-db:5432/paragonik_test
+      TEST_DATABASE_USER: paragonik
+      TEST_DATABASE_PASSWORD: paragonik
+    depends_on:
+      test-db:
+        condition: service_healthy

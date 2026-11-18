@@ -1,0 +1,367 @@
+openapi: 3.0.3
+info:
+  title: Paragonik API
+  version: 1.0.0
+  description: Kwoty w groszach, daty w formacie RRRR-MM-DD.
+servers:
+  - url: /
+tags:
+  - name: Konto i logowanie
+  - name: Użytkownicy
+  - name: Prośby o zwrot
+  - name: System
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      operationId: health
+      summary: Stan serwera
+      security: []
+      responses:
+        "200":
+          description: Serwer działa
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+        "503":
+          description: Brak połączenia z bazą
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+
+  /auth/register:
+    post:
+      tags: [Konto i logowanie]
+      operationId: register
+      summary: Rejestracja
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "201":
+          description: Konto utworzone
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "409":
+          description: E-mail jest już zajęty
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /auth/login:
+    post:
+      tags: [Konto i logowanie]
+      operationId: login
+      summary: Logowanie
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Zalogowano
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401":
+          description: Zły e-mail lub hasło
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /auth/logout:
+    post:
+      tags: [Konto i logowanie]
+      operationId: logout
+      summary: Wylogowanie i wyrejestrowanie tokenu FCM
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LogoutRequest" }
+      responses:
+        "204": { description: Wylogowano }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me:
+    get:
+      tags: [Konto i logowanie]
+      operationId: me
+      summary: Moje konto
+      responses:
+        "200":
+          description: Zalogowany użytkownik
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [Konto i logowanie]
+      operationId: updateProfile
+      summary: Zmiana imienia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileRequest" }
+      responses:
+        "200":
+          description: Zaktualizowany użytkownik
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    delete:
+      tags: [Konto i logowanie]
+      operationId: deleteAccount
+      summary: Usunięcie konta razem z tokenami i prośbami
+      responses:
+        "204": { description: Konto usunięte }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/fcm-token:
+    put:
+      tags: [Konto i logowanie]
+      operationId: saveFcmToken
+      summary: Zapis tokenu FCM telefonu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FcmTokenRequest" }
+      responses:
+        "204": { description: Zapisano }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /users:
+    get:
+      tags: [Użytkownicy]
+      operationId: searchUsers
+      summary: Wyszukiwanie po imieniu lub e-mailu
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Min. 2 znaki
+          schema: { type: string, example: ania }
+      responses:
+        "200":
+          description: Maks. 20 użytkowników, bez zalogowanego
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /requests:
+    post:
+      tags: [Prośby o zwrot]
+      operationId: sendRequest
+      summary: Wysłanie prośby o zwrot (z powiadomieniem push)
+      description: Suma items[].amount musi być równa amount. Ponowne wysłanie z tym samym clientId zwraca istniejącą prośbę.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePaymentRequest" }
+      responses:
+        "201":
+          description: Prośba utworzona
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentRequest" }
+        "200":
+          description: Prośba z tym clientId już istniała
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentRequest" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /requests/incoming:
+    get:
+      tags: [Prośby o zwrot]
+      operationId: incomingRequests
+      summary: Otrzymane prośby (od najnowszych, maks. 100)
+      responses:
+        "200":
+          description: Lista próśb
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PaymentRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /requests/{id}:
+    get:
+      tags: [Prośby o zwrot]
+      operationId: request
+      summary: Szczegóły prośby (dla nadawcy i odbiorcy)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Prośba
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Brak lub nieważny token
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationError:
+      description: Błędne dane
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Nie znaleziono
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error: { type: string, example: validation_error }
+        message: { type: string, example: Kwota musi być większa od zera. }
+
+    Health:
+      type: object
+      required: [status, database, push]
+      properties:
+        status: { type: string, enum: [ok, error] }
+        database: { type: string, enum: [up, down] }
+        push: { type: string, enum: [enabled, disabled] }
+
+    RegisterRequest:
+      type: object
+      required: [email, password, displayName]
+      properties:
+        email: { type: string, format: email, example: ania@example.com }
+        password: { type: string, minLength: 8, maxLength: 72, example: tajnehaslo123 }
+        displayName: { type: string, minLength: 2, maxLength: 50, example: Ania }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: ania@example.com }
+        password: { type: string, example: tajnehaslo123 }
+
+    AuthResponse:
+      type: object
+      required: [token, expiresAt, user]
+      properties:
+        token: { type: string }
+        expiresAt: { type: string, format: date-time }
+        user: { $ref: "#/components/schemas/User" }
+
+    User:
+      type: object
+      required: [id, email, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email, example: ania@example.com }
+        displayName: { type: string, example: Ania }
+
+    UpdateProfileRequest:
+      type: object
+      required: [displayName]
+      properties:
+        displayName: { type: string, minLength: 2, maxLength: 50, example: Ania K. }
+
+    FcmTokenRequest:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string }
+
+    LogoutRequest:
+      type: object
+      properties:
+        fcmToken: { type: string, nullable: true }
+
+    PaymentItem:
+      type: object
+      required: [name, amount]
+      properties:
+        name: { type: string, maxLength: 200, example: Płyn do naczyń (1/2) }
+        amount: { type: integer, format: int64, minimum: 0, example: 500 }
+
+    CreatePaymentRequest:
+      type: object
+      required: [recipientId, amount]
+      properties:
+        recipientId: { type: string, format: uuid }
+        amount: { type: integer, format: int64, minimum: 1, example: 1000 }
+        shopName: { type: string, nullable: true, maxLength: 100, example: Biedronka }
+        purchaseDate: { type: string, format: date, nullable: true, example: "2026-11-18" }
+        items:
+          type: array
+          maxItems: 200
+          items: { $ref: "#/components/schemas/PaymentItem" }
+        clientId: { type: string, format: uuid, nullable: true }
+      example:
+        recipientId: 3f0f7a7e-8a2c-4bf4-9f8e-0c1d2e3f4a5b
+        amount: 1000
+        shopName: Biedronka
+        purchaseDate: "2026-11-18"
+        items:
+          - { name: Chipsy, amount: 500 }
+          - { name: Płyn do naczyń (1/2), amount: 500 }
+        clientId: 7b9c2d4e-1f3a-4b5c-8d6e-9f0a1b2c3d4e
+
+    Person:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string, example: Oskar }
+
+    PaymentRequest:
+      type: object
+      required: [id, sender, recipient, amount, shopName, purchaseDate, items, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        sender: { $ref: "#/components/schemas/Person" }
+        recipient: { $ref: "#/components/schemas/Person" }
+        amount: { type: integer, format: int64, example: 1000 }
+        shopName: { type: string, nullable: true, example: Biedronka }
+        purchaseDate: { type: string, format: date, nullable: true, example: "2026-11-18" }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/PaymentItem" }
+        createdAt: { type: string, format: date-time, example: "2026-11-18T17:41:12.345Z" }
