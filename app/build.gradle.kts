@@ -59,7 +59,7 @@ android {
             // wysyłka do Firebase App Distribution: gradlew assembleRelease appDistributionUploadRelease
             firebaseAppDistribution {
                 artifactType = "APK"
-                groups = "testerzy" // grupa testerów założona w konsoli Firebase
+                groups = "chuje" // alias grupy testerów z konsoli Firebase
                 releaseNotes = git("log", "-1", "--pretty=%s").orEmpty() // opis zmian = ostatni commit
             }
         }

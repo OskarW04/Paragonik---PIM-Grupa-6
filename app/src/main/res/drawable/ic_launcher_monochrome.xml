@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- ikona w kolorach motywu (Android 13+): liczy się tylko kształt, więc paragon jest bez białego wypełnienia -->
+    <group
+        android:pivotX="135"
+        android:pivotY="180"
+        android:rotation="-15"
+        android:scaleX="0.14"
+        android:scaleY="0.14"
+        android:translateX="-81"
+        android:translateY="-126">
+        <path
+            android:pathData="M15,15 L35,30 L55,15 L75,30 L95,15 L115,30 L135,15 L155,30 L175,15 L195,30 L215,15 L235,30 L255,15 L255,345 L235,330 L215,345 L195,330 L175,345 L155,330 L135,345 L115,330 L95,345 L75,330 L55,345 L35,330 L15,345 Z"
+            android:strokeColor="#000000"
+            android:strokeLineJoin="round"
+            android:strokeWidth="16" />
+        <path
+            android:fillColor="#000000"
+            android:pathData="M50,65 h170 a5,5 0 0 1 5,5 v8 a5,5 0 0 1 -5,5 h-170 a5,5 0 0 1 -5,-5 v-8 a5,5 0 0 1 5,-5 z
+                M68,95 h134 a3,3 0 0 1 3,3 v4 a3,3 0 0 1 -3,3 h-134 a3,3 0 0 1 -3,-3 v-4 a3,3 0 0 1 3,-3 z
+                M49,118 h172 a4,4 0 0 1 4,4 v4 a4,4 0 0 1 -4,4 h-172 a4,4 0 0 1 -4,-4 v-4 a4,4 0 0 1 4,-4 z
+                M48,142 h94 a3,3 0 0 1 3,3 v4 a3,3 0 0 1 -3,3 h-94 a3,3 0 0 1 -3,-3 v-4 a3,3 0 0 1 3,-3 z
+                M183,142 h39 a3,3 0 0 1 3,3 v4 a3,3 0 0 1 -3,3 h-39 a3,3 0 0 1 -3,-3 v-4 a3,3 0 0 1 3,-3 z
+                M49,164 h122 a4,4 0 0 1 4,4 v4 a4,4 0 0 1 -4,4 h-122 a4,4 0 0 1 -4,-4 v-4 a4,4 0 0 1 4,-4 z
+                M199,164 h22 a4,4 0 0 1 4,4 v4 a4,4 0 0 1 -4,4 h-22 a4,4 0 0 1 -4,-4 v-4 a4,4 0 0 1 4,-4 z
+                M48,188 h109 a3,3 0 0 1 3,3 v4 a3,3 0 0 1 -3,3 h-109 a3,3 0 0 1 -3,-3 v-4 a3,3 0 0 1 3,-3 z
+                M44,216 a6,6 0 1 0 12,0 a6,6 0 1 0 -12,0 z
+                M62,216 a6,6 0 1 0 12,0 a6,6 0 1 0 -12,0 z
+                M98,211 h124 a3,3 0 0 1 3,3 v4 a3,3 0 0 1 -3,3 h-124 a3,3 0 0 1 -3,-3 v-4 a3,3 0 0 1 3,-3 z" />
+        <group
+            android:translateX="68"
+            android:translateY="248">
+            <path
+                android:fillColor="#000000"
+                android:pathData="M0,0h6v42h-6z M11,0h4v42h-4z M20,0h10v42h-10z M35,0h14v42h-14z M54,0h4v42h-4z M63,0h8v42h-8z M76,0h6v42h-6z M87,0h13v42h-13z M105,0h4v42h-4z M114,0h10v42h-10z" />
+        </group>
+    </group>
+</vector>
