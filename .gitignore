@@ -3,6 +3,7 @@
 /workspace.xml
 
 .gradle/
+.kotlin/
 /build/
 /app/build/
 .idea/
@@ -12,3 +13,10 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.iml
+
+# konfiguracja Firebase z kluczem API, każdy trzyma ją tylko u siebie
+/app/google-services.json
+
+# klucze do podpisywania aplikacji; z publicznego repo ktoś mógłby podpisać nimi fałszywą aktualizację
+*.keystore
+*.jks
